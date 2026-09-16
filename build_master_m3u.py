@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""Build a single deduplicated M3U playlist from the configured free IPTV sources."""
+"""Build clean master and Sweden-only M3U playlists."""
 
+from collections import defaultdict
 from pathlib import Path
 import re
 import urllib.request
@@ -13,98 +14,344 @@ SOURCES = [
     ("IPTV-org Sweden", "https://iptv-org.github.io/iptv/countries/se.m3u"),
 ]
 
-OUTPUT = Path("master.m3u")
+MASTER_OUTPUT = Path("master.m3u")
+SWEDEN_OUTPUT = Path("sweden.m3u")
 TIMEOUT = 45
+
+SOURCE_ORDER = {
+    name: i for i, (name, _) in enumerate(SOURCES)
+}
 
 
 def fetch(url: str) -> str:
     req = urllib.request.Request(
         url,
-        headers={"User-Agent": "PlueSwe-freeiptv/1.0"},
+        headers={"User-Agent": "PlueSwe-freeiptv/2.0"},
     )
     with urllib.request.urlopen(req, timeout=TIMEOUT) as response:
         return response.read().decode("utf-8", errors="replace")
 
 
 def attr(line: str, name: str) -> str:
-    match = re.search(rf'{re.escape(name)}="([^"]*)"', line, re.I)
+    match = re.search(
+        rf'{re.escape(name)}="([^"]*)"',
+        line,
+        re.I,
+    )
     return match.group(1).strip() if match else ""
 
 
 def normalize(value: str) -> str:
-    return re.sub(r"\W+", "", value.lower(), flags=re.UNICODE)
+    return re.sub(
+        r"\W+",
+        "",
+        value.lower(),
+        flags=re.UNICODE,
+    )
+
+
+def channel_name(info: str) -> str:
+    return info.rsplit(",", 1)[-1].strip()
 
 
 def parse_m3u(text: str):
-    lines = [line.strip() for line in text.splitlines() if line.strip()]
+    lines = [
+        line.strip()
+        for line in text.splitlines()
+        if line.strip()
+    ]
+
     entries = []
 
     for i, line in enumerate(lines[:-1]):
-        if line.startswith("#EXTINF") and not lines[i + 1].startswith("#"):
+        if (
+            line.startswith("#EXTINF")
+            and not lines[i + 1].startswith("#")
+        ):
             entries.append((line, lines[i + 1]))
 
     return entries
 
 
-def main():
-    all_entries = []
-    stats = []
+def is_sweden(source_name: str, info: str) -> bool:
 
-    for source_name, url in SOURCES:
-        try:
-            entries = parse_m3u(fetch(url))
-            stats.append((source_name, len(entries), "OK"))
-            all_entries.extend(entries)
-        except Exception as exc:
-            stats.append((source_name, 0, f"ERROR: {exc}"))
+    # These sources are explicitly Sweden-specific.
+    if source_name in {
+        "Pluto TV SE",
+        "IPTV-org Sweden",
+    }:
+        return True
+
+    country = attr(info, "tvg-country").upper()
+
+    if re.search(
+        r"(^|[,;| ])SE($|[,;| ])",
+        country,
+    ):
+        return True
+
+    group = attr(info, "group-title").strip().lower()
+
+    if group in {
+        "sweden",
+        "sverige",
+        "swedish",
+        "svenska",
+        "svenska kanaler",
+    }:
+        return True
+
+    tvg_id = attr(info, "tvg-id").lower()
+    channel_id = attr(info, "channel-id").lower()
+
+    if tvg_id.endswith("-se"):
+        return True
+
+    if channel_id.endswith("-se"):
+        return True
+
+    return False
+
+
+def sweden_group(source_name: str, info: str) -> str:
+
+    original = attr(info, "group-title").strip()
+
+    if source_name == "Pluto TV SE":
+        prefix = "🇸🇪 Sverige · Pluto TV"
+
+    elif source_name == "Samsung TV Plus":
+        prefix = "🇸🇪 Sverige · Samsung TV Plus"
+
+    elif source_name == "Roku":
+        prefix = "🇸🇪 Sverige · Roku"
+
+    elif source_name == "Free-TV":
+        prefix = "🇸🇪 Sverige · Free-TV"
+
+    else:
+        prefix = "🇸🇪 Sverige · IPTV-org"
+
+    return f"{prefix} · {original or 'Övrigt'}"
+
+
+def replace_group(info: str, group: str) -> str:
+
+    if re.search(
+        r'group-title="[^"]*"',
+        info,
+        re.I,
+    ):
+        return re.sub(
+            r'group-title="[^"]*"',
+            f'group-title="{group}"',
+            info,
+            count=1,
+            flags=re.I,
+        )
+
+    return (
+        info.rsplit(",", 1)[0]
+        + f' group-title="{group}",'
+        + channel_name(info)
+    )
+
+
+def international_group(info: str) -> str:
+    return (
+        attr(info, "group-title").strip()
+        or "Other"
+    )
+
+
+def dedupe(entries):
 
     seen_urls = set()
-    seen_ids = set()
-    seen_names = set()
-    unique = []
+    seen_channels = set()
 
-    for info, url in all_entries:
+    result = []
+
+    for source_name, info, url in entries:
+
+        # Exact stream duplicate.
         if url in seen_urls:
             continue
 
-        tvg_id = attr(info, "tvg-id")
-        group = attr(info, "group-title")
-        name = info.rsplit(",", 1)[-1].strip()
+        name = normalize(channel_name(info))
+        tvg_id = normalize(attr(info, "tvg-id"))
+        country = normalize(attr(info, "tvg-country"))
 
-        if tvg_id:
-            key = normalize(tvg_id)
-            if key in seen_ids:
-                continue
-            seen_ids.add(key)
-        else:
-            key = (normalize(name), normalize(group))
-            if key in seen_names:
-                continue
-            seen_names.add(key)
+        # Prefer tvg-id when available, otherwise channel name.
+        channel_key = tvg_id or name
+
+        # Deduplicate within the same source/country.
+        key = (
+            source_name,
+            channel_key,
+            country,
+        )
+
+        if key in seen_channels:
+            continue
 
         seen_urls.add(url)
-        unique.append((info, url))
+        seen_channels.add(key)
 
-    # Prefer an existing #EXTM3U header, including EPG attributes if supplied.
-    header = "#EXTM3U"
-    for info_source, url in SOURCES:
-        try:
-            first_line = fetch(url).splitlines()[0].strip()
-            if first_line.startswith("#EXTM3U"):
-                header = first_line
-                break
-        except Exception:
-            pass
+        result.append(
+            (source_name, info, url)
+        )
 
-    with OUTPUT.open("w", encoding="utf-8", newline="\n") as output:
-        output.write(header + "\n")
-        for info, url in unique:
+    return result
+
+
+def write_playlist(path: Path, entries):
+
+    with path.open(
+        "w",
+        encoding="utf-8",
+        newline="\n",
+    ) as output:
+
+        output.write("#EXTM3U\n")
+
+        for _, info, url in entries:
             output.write(info + "\n")
             output.write(url + "\n")
 
-    print(f"Created {OUTPUT}: {len(unique):,} unique channels")
+
+def main():
+
+    raw_entries = []
+    stats = []
+
+    for source_name, url in SOURCES:
+
+        try:
+            entries = parse_m3u(
+                fetch(url)
+            )
+
+            stats.append(
+                (
+                    source_name,
+                    len(entries),
+                    "OK",
+                )
+            )
+
+            raw_entries.extend(
+                (
+                    source_name,
+                    info,
+                    stream,
+                )
+                for info, stream in entries
+            )
+
+        except Exception as exc:
+
+            stats.append(
+                (
+                    source_name,
+                    0,
+                    f"ERROR: {exc}",
+                )
+            )
+
+    unique = dedupe(raw_entries)
+
+    sweden = []
+    international = []
+
+    source_counts = defaultdict(int)
+
+    for source_name, info, url in unique:
+
+        source_counts[source_name] += 1
+
+        if is_sweden(source_name, info):
+
+            info = replace_group(
+                info,
+                sweden_group(
+                    source_name,
+                    info,
+                ),
+            )
+
+            sweden.append(
+                (
+                    source_name,
+                    info,
+                    url,
+                )
+            )
+
+        else:
+
+            international.append(
+                (
+                    source_name,
+                    info,
+                    url,
+                )
+            )
+
+    # Sweden first.
+    sweden.sort(
+        key=lambda e: (
+            SOURCE_ORDER[e[0]],
+            channel_name(e[1]).lower(),
+        )
+    )
+
+    # International channels grouped alphabetically.
+    international.sort(
+        key=lambda e: (
+            international_group(e[1]).lower(),
+            channel_name(e[1]).lower(),
+            SOURCE_ORDER[e[0]],
+        )
+    )
+
+    write_playlist(
+        SWEDEN_OUTPUT,
+        sweden,
+    )
+
+    write_playlist(
+        MASTER_OUTPUT,
+        sweden + international,
+    )
+
+    print(
+        f"Created {SWEDEN_OUTPUT}: "
+        f"{len(sweden):,} Swedish channels"
+    )
+
+    print(
+        f"Created {MASTER_OUTPUT}: "
+        f"{len(sweden) + len(international):,} total channels"
+    )
+
+    print()
+
     for name, count, status in stats:
-        print(f"{name}: {count:,} entries [{status}]")
+        print(
+            f"{name}: "
+            f"{count:,} parsed [{status}]"
+        )
+
+    print()
+
+    print(
+        f"Sweden: {len(sweden):,}"
+    )
+
+    print(
+        f"International: "
+        f"{len(international):,}"
+    )
 
 
 if __name__ == "__main__":
