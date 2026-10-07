@@ -265,8 +265,6 @@ https://jmp2.uk/plu-685139b0f7d8b74b62f41c96.m3u8
 https://jmp2.uk/plu-62cda0dfddc1040008fccacc.m3u8
 #EXTINF:-1 channel-id="61c09342b3a6230007a45119" tvg-id="61c09342b3a6230007a45119" tvg-chno="456" tvg-name="MTV Teen Mom" tvg-logo="https://images.pluto.tv/channels/61c09342b3a6230007a45119/colorLogoPNG_1748001887981.png" group-title="🇸🇪 Sverige · Pluto TV · Det bästa från MTV",MTV Teen Mom
 https://jmp2.uk/plu-61c09342b3a6230007a45119.m3u8
-#EXTINF:-1 channel-id="6a9a7b6bcb18e0ed023a09f1" tvg-id="6a9a7b6bcb18e0ed023a09f1" tvg-chno="5" tvg-name="MTV VMAs 2026" tvg-logo="https://images.pluto.tv/channels/6a9a7b6bcb18e0ed023a09f1/colorLogoPNG_1790583890863.png" group-title="🇸🇪 Sverige · Pluto TV · Nytt på Pluto TV",MTV VMAs 2026
-https://jmp2.uk/plu-6a9a7b6bcb18e0ed023a09f1.m3u8
 #EXTINF:-1 channel-id="6a68c55b75fd5e3828f08d6e" tvg-id="6a68c55b75fd5e3828f08d6e" tvg-chno="125" tvg-name="NFL Channel" tvg-logo="https://images.pluto.tv/channels/6a68c55b75fd5e3828f08d6e/colorLogoPNG_1785251255335.png" group-title="🇸🇪 Sverige · Pluto TV · Sport",NFL Channel
 https://jmp2.uk/plu-6a68c55b75fd5e3828f08d6e.m3u8
 #EXTINF:-1 channel-id="6728d33f030a2c0008edf4be" tvg-id="6728d33f030a2c0008edf4be" tvg-chno="304" tvg-name="NonStop Kung Fu" tvg-logo="https://images.pluto.tv/channels/6728d33f030a2c0008edf4be/colorLogoPNG_1732097527894.png" group-title="🇸🇪 Sverige · Pluto TV · Filmer",NonStop Kung Fu
@@ -333,6 +331,8 @@ https://jmp2.uk/plu-61f9597e78607000074f6c2a.m3u8
 https://jmp2.uk/plu-655caad95812e800088843a6.m3u8
 #EXTINF:-1 channel-id="68ac56363efb41cd979a8005" tvg-id="68ac56363efb41cd979a8005" tvg-chno="108" tvg-name="Pluto TV Snooker 900" tvg-logo="https://images.pluto.tv/channels/68ac56363efb41cd979a8005/colorLogoPNG_1760517057647.png" group-title="🇸🇪 Sverige · Pluto TV · Sport",Pluto TV Snooker 900
 https://jmp2.uk/plu-68ac56363efb41cd979a8005.m3u8
+#EXTINF:-1 channel-id="62cd74e38f6f0d000798cd93" tvg-id="62cd74e38f6f0d000798cd93" tvg-chno="101" tvg-name="Pluto TV Sport" tvg-logo="https://images.pluto.tv/channels/62cd74e38f6f0d000798cd93/colorLogoPNG_1746816954969.png" group-title="🇸🇪 Sverige · Pluto TV · Sport",Pluto TV Sport
+https://jmp2.uk/plu-62cd74e38f6f0d000798cd93.m3u8
 #EXTINF:-1 channel-id="61c18c7610d254000727eeb0" tvg-id="61c18c7610d254000727eeb0" tvg-chno="591" tvg-name="Pluto TV Star Trek" tvg-logo="https://images.pluto.tv/channels/61c18c7610d254000727eeb0/colorLogoPNG.png" group-title="🇸🇪 Sverige · Pluto TV · Star Trek 60-årsjubileum",Pluto TV Star Trek
 https://jmp2.uk/plu-61c18c7610d254000727eeb0.m3u8
 #EXTINF:-1 channel-id="67f5095a3481170e6843d95d" tvg-id="67f5095a3481170e6843d95d" tvg-chno="921" tvg-name="Pluto TV Tecknade klassiker" tvg-logo="https://images.pluto.tv/channels/67f5095a3481170e6843d95d/colorLogoPNG_1748955339418.png" group-title="🇸🇪 Sverige · Pluto TV · Barn",Pluto TV Tecknade klassiker
@@ -507,8 +507,6 @@ https://komhls.wns.live/hls/stream.m3u8
 https://svt-live-channel.akamaized.net/l6/se/svtk/master-fmp4.m3u8?defaultSubLang=1&format=hls
 #EXTINF:-1 tvg-id="MiracleChannel.se@SD" tvg-logo="https://i.imgur.com/yrt7Rw9.png" group-title="🇸🇪 Sverige · IPTV-org · News",Miracle Channel (1080p)
 https://live.miracleonline.org/hls/miracle1.m3u8
-#EXTINF:-1 tvg-id="PlutoTVSport.se@SE" tvg-logo="https://images.pluto.tv/channels/6357f3de3643ba0007bc0b50/colorLogoPNG_1746816938506.png" group-title="🇸🇪 Sverige · IPTV-org · Sports",Pluto TV Sport (Sweden)
-https://jmp2.uk/plu-62cd74e38f6f0d000798cd93.m3u8
 #EXTINF:-1 tvg-id="SVT1.se@HD" tvg-logo="https://i.imgur.com/j6KusQX.png" group-title="🇸🇪 Sverige · IPTV-org · Undefined",SVT1 HD (1080p) [Geo-blocked]
 https://svt-live-channel.akamaized.net/l4/se/svt1/master-fmp4.m3u8?defaultSubLang=1&format=hls
 #EXTINF:-1 tvg-id="SVT2.se@HD" tvg-logo="https://i.imgur.com/pGWvCxp.png" group-title="🇸🇪 Sverige · IPTV-org · Undefined",SVT2 HD (1080p) [Geo-blocked]
