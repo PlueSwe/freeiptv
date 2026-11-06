@@ -511,5 +511,5 @@ https://live.miracleonline.org/hls/miracle1.m3u8
 https://svt-live-channel.akamaized.net/l4/se/svt1/master-fmp4.m3u8?defaultSubLang=1&format=hls
 #EXTINF:-1 tvg-id="SVT2.se@HD" tvg-logo="https://i.imgur.com/pGWvCxp.png" group-title="🇸🇪 Sverige · IPTV-org · Undefined",SVT2 HD (1080p) [Geo-blocked]
 https://svt-live-channel.akamaized.net/l6/se/svt2/master-fmp4.m3u8?defaultSubLang=1&format=hls
-#EXTINF:-1 tvg-id="ThePetCollective.us@Sweden" tvg-logo="https://i.imgur.com/yH7n2dF.png" group-title="🇸🇪 Sverige · IPTV-org · Family",The Pet Collective Sweden
+#EXTINF:-1 tvg-id="ThePetCollective.us@Sweden" tvg-logo="https://i.imgur.com/yH7n2dF.png" group-title="🇸🇪 Sverige · IPTV-org · Family",The Pet Collective Sweden (720p)
 https://the-pet-collective-international-se.samsung.wurl.tv/playlist.m3u8
